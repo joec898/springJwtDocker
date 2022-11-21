@@ -1,0 +1,36 @@
+version: "3.8"
+volumes:
+  db_data:
+services:
+  api_emp:
+    image: springjwt:latest
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+    ports:
+      - "8084:8080"
+    depends_on:
+      - testusers_db
+    links:
+      - testusers_db  
+    environment:
+      - WAIT_HOSTS=mysql:3306
+      - WAIT_HOSTS_TIMEOUT=300
+      - WAIT_SLEEP_INTERVAL=30
+      - WAIT_HOST_CONNECT_TIMEOUT=30
+      - spring.profiles.active=uat
+  testusers_db:
+    container_name: "mysql8u"
+    image: mysql:8.0
+    volumes:
+      - .docker/setup.sql:/docker-entrypoint-initdb.d/setup.sql
+      - db_data:/var/lib/mysql8u
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: testusers
+      MYSQL_USER: myadmin
+      MYSQL_PASSWORD: LetMeIn
+      #MYSQL_TCP_PORT: 3308
+    ports:
+      - "3309:3306"
+     
