@@ -36,10 +36,13 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
 		return new AuthTokenFilter();
 	}
 
+    // Injecting Google custom authentication provider
+    @Autowired
+    MockAuthenticationProvider googleCloudAuthenticationProvider;
+    
 	// @Override
-	// public void configure(AuthenticationManagerBuilder
-	// authenticationManagerBuilder) throws Exception {
-	// authenticationManagerBuilder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
+	// public void configure(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
+	//     authenticationManagerBuilder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
 	// }
 
 	@Bean
@@ -52,7 +55,7 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
-	public AuthenticationManager autehticationManager(AuthenticationConfiguration authConfig) throws Exception {
+	public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
 		return authConfig.getAuthenticationManager();
 	}
 
@@ -66,10 +69,11 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
 		http.cors().and().csrf().disable().exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
 				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests()
 				.antMatchers("/**").permitAll()
-				.antMatchers("/api/auth/**").permitAll().antMatchers("/api/test/**").permitAll().anyRequest()
-				.authenticated();
-
-		http.authenticationProvider(authenticationProvider());
+				.antMatchers("/api/auth/**").permitAll()
+				.antMatchers("/api/test/**").permitAll().anyRequest().authenticated();
+		
+		// authentication order: authenticationProvider, authenticationProvider
+		http.authenticationProvider(authenticationProvider()).authenticationProvider(googleCloudAuthenticationProvider);
 
 		http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 
@@ -89,3 +93,5 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
 	// }
 
 }
+
+
